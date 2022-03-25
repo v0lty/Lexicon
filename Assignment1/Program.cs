@@ -54,7 +54,7 @@ namespace Assignment1
         public static double RunEquation(string input)
         {
             // Regex.Split(input, @"([\+\-\*\/\(\)])") ger samma resultat men
-            // eftersom att det är en skoluppgift utförs det manuellt
+            // valde att göra det manuellt för sakens skull
             var inputList = SplitNumbersAndOperators(input, operators);
 
             // ekvationer måste utföras i ordningen */-+ när flera tal används i följd
@@ -81,7 +81,7 @@ namespace Assignment1
                     var equation = SimpleMath.Calculate(inputList[j][0], valA, valB);
 
                     // använda tal och operator raderas och ersätts med ekvationen och användas i nästa iteration
-                    // tills att alla fält i listan tagits bort och enbart slutresultatet finns kvar.
+                    // varje del behöver brytas ut så att 55+10*80/3-10+2 räknas ut som 55+(((10*80)/3)-10)+2
                     inputList.RemoveRange(j - 1, 3);
                     inputList.Insert(j - 1, equation.ToString());
                 }
@@ -116,7 +116,6 @@ namespace Assignment1
                     break;
                 }
             }
-
             // tal efter sista funna operatorn
             result.Add(input.Substring(oldPos, input.Length - oldPos));
 
@@ -131,7 +130,7 @@ namespace Assignment1
             do {
                 Console.Clear();
                 Console.WriteLine("Please enter your equation:");
-                var input = Console.ReadLine(); // 55+10*80/3-10+2 == 55+(((10*80)/3)-10)+2
+                var input = Console.ReadLine(); 
 
                 // ta bort ev. blanksteg
                 input = new string(input.ToCharArray().Where(c => !Char.IsWhiteSpace(c)).ToArray());
