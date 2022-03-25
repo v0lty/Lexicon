@@ -7,7 +7,7 @@ namespace Assignment1
 {
     public static class SimpleMath
     {
-        public static int Calculate(char operation, int a, int b)
+        public static double Calculate(char operation, double a, double b)
         {
             switch (operation)
             {
@@ -16,32 +16,32 @@ namespace Assignment1
                 case '/': return Division(a, b);
                 case '*': return Multiplication(a, b);
                 default:
-                    return 0;
+                    return 0d;
             }
         }
 
-        private static int Addition(int a, int b)
+        private static double Addition(double a, double b)
         {
             return a + b;
         }
 
-        private static int Subtraction(int a, int b)
+        private static double Subtraction(double a, double b)
         {
             return a - b;
         }
 
-        private static int Division(int a, int b)
+        private static double Division(double a, double b)
         {
             // alternativt kan DivideByZeroException fångas i ett try block
-            if (b == 0) {
+            if (b == 0d) {
                 Console.WriteLine("You were trying to devide by zero!");
-                return 0;
+                return 0d;
             }
 
             return a / b;
         }
 
-        private static int Multiplication(int a, int b)
+        private static double Multiplication(double a, double b)
         {
             return a * b;
         }
@@ -49,62 +49,61 @@ namespace Assignment1
 
     public static class Calculator
     {
-        public static readonly char[] Operators = new char[] { '*', '/', '-', '+' };
+        public static readonly char[] operators = new char[] { '*', '/', '-', '+' };
 
-        public static int RunEquation(string input)
+        public static double RunEquation(string input)
         {
             // Regex.Split(input, @"([\+\-\*\/\(\)])") ger samma resultat men
             // eftersom att det är en skoluppgift utförs det manuellt
-            var list = SplitNumbersAndOperators(input, Operators);
+            var inputList = SplitNumbersAndOperators(input, operators);
 
             // ekvationer måste utföras i ordningen */-+ när flera tal används i följd
-            for (int i = 0; i < Operators.Length; i++)
+            for (int i = 0; i < operators.Length; i++)
             {
                 while (true) 
                 {
                     // hitta första operatorn så ekvation kan utföras med talen till vänster och höger om den
-                    int j = list.IndexOf(Operators[i].ToString());
+                    int j = inputList.IndexOf(operators[i].ToString());
                     if (j < 0)
                         break;
 
-                    if (j + 1 >= list.Count) {
+                    if (j + 1 >= inputList.Count) {
                         Console.WriteLine("Invalid format. Please check values and operators!");
-                        return 0;
+                        return 0d;
                     }
 
-                    if (!int.TryParse(list[j - 1], out int valA)
-                     || !int.TryParse(list[j + 1], out int valB)) {
+                    if (!double.TryParse(inputList[j - 1], out double valA)
+                     || !double.TryParse(inputList[j + 1], out double valB)) {
                         Console.WriteLine("Invalid format. One or more values couldn't be parsed!");
-                        return 0;
+                        return 0d;
                     }
 
-                    var equation = SimpleMath.Calculate(list[j][0], valA, valB);
+                    var equation = SimpleMath.Calculate(inputList[j][0], valA, valB);
 
                     // använda tal och operator raderas och ersätts med ekvationen och användas i nästa iteration
                     // tills att alla fält i listan tagits bort och enbart slutresultatet finns kvar.
-                    list.RemoveRange(j - 1, 3);
-                    list.Insert(j - 1, equation.ToString());
+                    inputList.RemoveRange(j - 1, 3);
+                    inputList.Insert(j - 1, equation.ToString());
                 }
             }
 
-            if (list.Count == 0 || String.IsNullOrEmpty(list[0]))
+            if (inputList.Count == 0 || String.IsNullOrEmpty(inputList[0]))
             {
                 Console.WriteLine("Equation failed!");
-                return 0;
+                return 0d;
             }
 
-            return int.Parse(list[0]);
+            return double.TryParse(inputList[0], out double result) ? result : 0d;
         }
 
         private static List<string> SplitNumbersAndOperators(string input, char[] match)
         {
             var result = new List<string>(); 
             int oldPos = 0;
-            int curPos = 0;
-            
-            do {
+
+            while (true) {
                 // index av första påträffade operator
-                curPos = input.IndexOfAny(match, oldPos);
+                int curPos = input.IndexOfAny(match, oldPos);
 
                 if (curPos >= 0) {
                     // lägg till operator samt talet innan
@@ -113,8 +112,11 @@ namespace Assignment1
 
                     oldPos = curPos + 1;
                 }
+                else {
+                    break;
+                }
             }
-            while (curPos >= 0);
+
             // tal efter sista funna operatorn
             result.Add(input.Substring(oldPos, input.Length - oldPos));
 
@@ -129,30 +131,16 @@ namespace Assignment1
             do {
                 Console.Clear();
                 Console.WriteLine("Please enter your equation:");
-                var input = Console.ReadLine(); // 55+10*80/3-10+2
+                var input = Console.ReadLine(); // 55+10*80/3-10+2 == 55+(((10*80)/3)-10)+2
 
-                if (String.IsNullOrEmpty(input))
-                {
-                    Console.WriteLine("Invalid format. Please enter some values!");
-                }
-                else if (input.Any(c => (!Char.IsDigit(c) && !Calculator.Operators.Contains<char>(c))))
-                {
-                    // varken nummer eller operator
-                    Console.WriteLine("Invalid format. Equation contains invalid input!");
-                }
-                else {
-                    // ta bort ev. blanksteg
-                    input = new string(input.ToCharArray().Where(c => !Char.IsWhiteSpace(c)).ToArray());
-                    var result = Calculator.RunEquation(input);
+                // ta bort ev. blanksteg
+                input = new string(input.ToCharArray().Where(c => !Char.IsWhiteSpace(c)).ToArray());
+                var result = Calculator.RunEquation(input);
 
-                    Console.WriteLine("\nResult: {0}", result);
-                }
-
+                Console.WriteLine("\nResult: {0}", result);
                 Console.WriteLine("\nDo you want to exit? [Y/N]:");
             }
             while (Console.ReadKey().Key != ConsoleKey.Y);
         }
     }
 }
-
-// github test
