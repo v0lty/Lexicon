@@ -134,12 +134,29 @@ namespace Assignment1
 
                 // ta bort ev. blanksteg
                 input = new string(input.ToCharArray().Where(c => !Char.IsWhiteSpace(c)).ToArray());
-                var result = Calculator.RunEquation(input);
+                // tillåt både , & . som decimal
+                input = input.Replace('.', ',');
 
-                Console.WriteLine("\nResult: {0}", result);
-                Console.WriteLine("\nDo you want to exit? [Y/N]:");
+                var result = Calculator.RunEquation(input);
+                Console.WriteLine("\nResult: {0}", result);                
             }
-            while (Console.ReadKey().Key != ConsoleKey.Y);
+            while (!Confirm("Do you want to quit?"));
+        }
+
+        public static bool Confirm(string message)
+        {
+            ConsoleKey input;
+
+            do {
+                Console.Write("{0} [y/n]:", message);
+                input = Console.ReadKey(false).Key;
+
+                if (input != ConsoleKey.Enter)         
+                    Console.WriteLine();
+            
+            } while (input != ConsoleKey.Y && input != ConsoleKey.N);
+
+            return (input == ConsoleKey.Y);
         }
     }
 }
