@@ -41,7 +41,7 @@ namespace Assignment2
 
                     WriteLine(message ?? "");
 
-                    var input = Input.RequestInput(hangman.TotalGuessesCount == 0 ? "Enter your guess:" : "Enter your next guess:");
+                    var input = Input.RequestInput("Enter your guess:");
 
                     if (hangman.CheckGuess(input)) {
                         message = $"You have already guessed '{input}'.";
