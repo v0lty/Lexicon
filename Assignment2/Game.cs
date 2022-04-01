@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 using static System.Console;
 
@@ -27,113 +28,91 @@ namespace Assignment2
         + @"|       " + "\n";
 
         private readonly RandomWord randomWord = new RandomWord();
-        private StringBuilder wrongGuesses;
-        private int wrongGuessesCount;
-        private char[] correctGuesses;
-        private string secretWord;
-        private string status;       
+        public StringBuilder WrongGuesses { get; private set; }
+        public List<string> WrongWordGuesses { get; private set; }
+        public int WrongGuessesCount { get; private set; }
+        public char[] CorrectGuesses { get; private set; }
+        public int CorrectGuessesCount { get; private set; }
+        public int TotalGuessesCount { get { return CorrectGuessesCount + WrongGuessesCount; } }
+        public string SecretWord { get; private set; }
 
-        public void Run()
+        public void Init()
         {
-            WriteLogo();
-            WriteLine("\n\nWelcome to Hangman!");
-            WriteLine("Press any key to start playing...");
-            ReadKey();
-
-            do /*main loop*/ 
-            {
-                secretWord = randomWord.Next();                
-                correctGuesses = new char[secretWord.Length];
-                wrongGuesses = new StringBuilder();
-                wrongGuessesCount = 0;
-                status = null;
-
-                do /*game loop*/ 
-                {
-                    Clear();
-                    WriteLogo();
-                    WriteHangman();
-                    WriteGuesses();
-                    WriteSecretWord();
-                    WriteLetters();
-                    
-                    // check needs to happend before HandleInput() so that everything
-                    // is drawn on last loop
-                    if (correctGuesses.SequenceEqual(secretWord.ToCharArray()) 
-                     || wrongGuessesCount >= 10)
-                        break;
-
-                    WriteLine(status ?? "");
-                    HandleInput(RequestInput("Enter your guess:"));                    
-                }
-                while (true);
-                        
-                if (wrongGuessesCount < 10)             
-                    WriteLine($"Congratulation you won!");             
-                else
-                    WriteLine($"Game Over! Correct word was '{secretWord}'.");
-            }
-            while (RequestConfirmation("Do you want to play again?"));
+            SecretWord = randomWord.Next();
+            CorrectGuesses = new char[SecretWord.Length];
+            WrongGuesses = new StringBuilder();
+            WrongWordGuesses = new List<string>();
+            WrongGuessesCount = 0;
         }
 
-        private void HandleInput(string input)
+        public bool CheckGuess(string input)
         {
-            if (input.Length > 1) /*word*/
+            if (input.Length == 1)
+                return CorrectGuesses.Contains<char>(input[0]) || WrongGuesses.ToString().Contains(input[0]);
+
+            return WrongWordGuesses.Contains(input);
+        }
+
+        public bool Guess(string input)
+        {
+            return (input.Length == 1) ? GuessCharacter(input[0]) : GuessWord(input);
+        }
+
+        private bool GuessCharacter(char input)
+        {
+            int i = SecretWord.IndexOf(input), j = 0;
+            if (i >= 0)
             {
-                if (input == secretWord) {
-                    correctGuesses = input.ToCharArray();
-                    status = null;
+                do {
+                    CorrectGuesses[i] = SecretWord[i];
+                    // same letter may exist more than once
+                    i = SecretWord.IndexOf(input, Math.Min(i + 1, SecretWord.Length));
+                    j++;
                 }
-                else /*wrong word*/ {
-                    wrongGuessesCount++;
-                    status = "Wrong guess, try again!";
-                }
+                while (i > 0);
+                CorrectGuessesCount++;
+                return true;
             }
-            else /*letter*/ {
-
-                if (correctGuesses.Contains<char>(input[0]) || wrongGuesses.ToString().Contains(input[0])) {
-                    // ignore guess and input
-                    status = $"You have already guessed '{input[0]}'.";
-                    return;
-                }
-
-                int i = secretWord.IndexOf(input[0]), j = 0;
-                if (i >= 0) {
-                    do { 
-                        correctGuesses[i] = secretWord[i];
-                        // same letter may exist more than once
-                        i = secretWord.IndexOf(input[0], Math.Min(i + 1, secretWord.Length));
-                        j++;
-                    }
-                    while (i > 0);
-                    status = $@"'{input[0]}' was fount {j} time{((j > 1) ? "s" : "")} in the word!";
-                }
-                else /*wrong letter*/ {
-                    wrongGuesses.Append(input);
-                    wrongGuessesCount++;
-                    status = "Wrong guess, try again!";
-                }
+            else /*wrong letter*/
+            {
+                WrongGuesses.Append(input);
+                WrongGuessesCount++;
+                return false;
             }
         }
 
-        private void WriteLogo()
+        private bool GuessWord(string input)
+        {
+            if (input == SecretWord) {
+                CorrectGuesses = input.ToCharArray();
+                CorrectGuessesCount++;
+                return true;
+            }
+            else /*wrong word*/ {
+                WrongWordGuesses.Add(input);
+                WrongGuessesCount++;                
+                return false;
+            }
+        }
+
+        public void PrintLogo()
         {
             WriteLine(hangManLogo);
         }
 
-        private void WriteHangman()
+        public void PrintHangman()
         {
             for (int i = 0; i < hangMan.Length; i++)
             {
-                if ((wrongGuessesCount >= 1 && (i == 9 || i == 18 || i == 27 || i == 36 || i == 45)) // pole
-                 || (wrongGuessesCount >= 2 && (i <= 4))    // beam
-                 || (wrongGuessesCount >= 3 && (i == 13))   // rope
-                 || (wrongGuessesCount >= 4 && (i == 22))   // head
-                 || (wrongGuessesCount >= 5 && (i == 31))   // neck
-                 || (wrongGuessesCount >= 6 && (i == 30))   // larm
-                 || (wrongGuessesCount >= 7 && (i == 32))   // rarm
-                 || (wrongGuessesCount >= 8 && (i == 39))   // lleg
-                 || (wrongGuessesCount >= 9 && (i == 41)))  // rleg
+                if ((WrongGuessesCount >= 1 && (i == 9 || i == 18 || i == 27 || i == 36 || i == 45)) // pole
+                 || (WrongGuessesCount >= 2 && (i <= 4))    // beam
+                 || (WrongGuessesCount >= 3 && (i == 13))   // rope
+                 || (WrongGuessesCount >= 4 && (i == 22))   // head
+                 || (WrongGuessesCount >= 5 && (i == 31))   // neck
+                 || (WrongGuessesCount >= 6 && (i == 30))   // larm
+                 || (WrongGuessesCount >= 7 && (i == 32))   // rarm
+                 || (WrongGuessesCount >= 8 && (i == 39))   // lleg
+                 || (WrongGuessesCount >= 9 && (i == 41)))  // rleg
                 {
                     ForegroundColor = ConsoleColor.Red;
                 }
@@ -147,43 +126,36 @@ namespace Assignment2
             WriteLine();
         }
 
-        private void WriteGuesses()
+        public void PrintGuesses()
         {
-            WriteLine("Number of wrong guesses:");  
-
-            if (wrongGuessesCount > 0)
+            if (WrongGuessesCount > 0)
                 ForegroundColor = ConsoleColor.Red;
 
-            Write($"{wrongGuessesCount}\n\n");
+            Write($"{WrongGuessesCount}\n\n");
             ForegroundColor = ConsoleColor.White;
         }
 
-        private void WriteSecretWord()
+        public void PrintSecretWord()
         {
-            WriteLine("Secret word:");
+            string guesses = new string(CorrectGuesses);
 
-            for (int i = 0; i < secretWord.Length; i++)
+            for (int i = 0; i < SecretWord.Length; i++)
             {
-                string guesses = new string(correctGuesses);
-
-                if (guesses.Contains(secretWord[i].ToString()))
-                    Write($"{secretWord[i]} ");
+                if (guesses.Contains(SecretWord[i].ToString()))
+                    Write($"{SecretWord[i]} ");
                 else
                     Write($"_ ");
             }
-            WriteLine("\n");
         }
 
-        private void WriteLetters()
+        public void PrintAlphabet()
         {
-            WriteLine("Letters:");
-
             for (char c = 'A'; c <= 'Z'; c++)
             {
                 ForegroundColor 
-                    = correctGuesses.Contains<char>(c)
+                    = CorrectGuesses.Contains<char>(c)
                     ? ConsoleColor.Green
-                    : wrongGuesses.ToString().Contains(c)
+                    : WrongGuesses.ToString().Contains(c)
                     ? ConsoleColor.Red
                     : ConsoleColor.White;
 
@@ -191,40 +163,6 @@ namespace Assignment2
             }
 
             ForegroundColor = ConsoleColor.White;
-            WriteLine("\n");
-        }
-
-        private bool RequestConfirmation(string message)
-        {
-            ConsoleKey input;
-
-            do {
-                Write($"{message} [y/n]:");
-                input = ReadKey(false).Key;
-
-                if (input != ConsoleKey.Enter)
-                    WriteLine();
-
-            } while (input != ConsoleKey.Y 
-                  && input != ConsoleKey.N);
-
-            return (input == ConsoleKey.Y);
-        }
-
-        private string RequestInput(string message)
-        {
-            while (true) 
-            {
-                WriteLine(message);
-                var input = ReadLine().ToUpper();
-
-                if (Regex.Matches(input, @"[A-Za-z]").Count > 0)
-                {
-                    return input;
-                }
-                else
-                    WriteLine("Accepted characters and words with letters A to Z, try again.");
-            }
-        }
+        } 
     }
 }
