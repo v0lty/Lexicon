@@ -14,7 +14,7 @@ namespace Assignment2
 
             do {
                 Clear();
-                hangman.Init();
+                hangman.Reset();                
                 hangman.PrintLogo();
                 WriteLine("\n\nWelcome to Hangman!");
                 WriteLine("Press any key to start playing...");
@@ -36,8 +36,7 @@ namespace Assignment2
 
                     // check needs to occur before HandleInput() so that everything
                     // is drawn on last loop, same goes for messages..
-                    if (hangman.CorrectGuesses.SequenceEqual(hangman.SecretWord.ToCharArray())
-                     || hangman.WrongGuessesCount >= 10)
+                    if (hangman.HaveCorrectWord() || hangman.WrongGuessesCount >= 10)
                         break;
 
                     WriteLine(message ?? "");
@@ -50,18 +49,23 @@ namespace Assignment2
                     }
 
                     if (hangman.Guess(input))
-                    {
                         message = "Correct guess!";
-                    }
                     else
                         message = "Wrong guess, try again!";                    
                 }
                 while (true);
 
-                if (hangman.WrongGuessesCount <= 10)
+                if (hangman.HaveCorrectWord() && hangman.WrongGuessesCount < 10)
+                {
+                    ForegroundColor = ConsoleColor.Green;
                     WriteLine($"Congratulation you won!");
-                else
+                    ForegroundColor = ConsoleColor.White;
+                }
+                else {
+                    ForegroundColor = ConsoleColor.Red;
                     WriteLine($"Game Over! Correct word was '{hangman.SecretWord}'.");
+                    ForegroundColor = ConsoleColor.White;
+                }
 
             }
             while (Input.RequestConfirmation("Do you want to play again?"));

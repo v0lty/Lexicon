@@ -36,13 +36,18 @@ namespace Assignment2
         public int TotalGuessesCount { get { return CorrectGuessesCount + WrongGuessesCount; } }
         public string SecretWord { get; private set; }
 
-        public void Init()
+        public void Reset()
         {
             SecretWord = randomWord.Next();
             CorrectGuesses = new char[SecretWord.Length];
             WrongGuesses = new StringBuilder();
             WrongWordGuesses = new List<string>();
             WrongGuessesCount = 0;
+        }
+
+        public bool HaveCorrectWord()
+        {
+            return CorrectGuesses.SequenceEqual(SecretWord.ToCharArray());
         }
 
         public bool CheckGuess(string input)
