@@ -32,6 +32,8 @@ namespace Assignment1
         /// </summary>
         public static double Add(double[] values)
         {
+            lastError = null;
+
             return (values?.Length > 1) 
                 ? values.Aggregate((temp, x) => temp + x) // foreach temp += x.. 
                 : double.NaN;
@@ -47,6 +49,8 @@ namespace Assignment1
         /// </summary>
         public static double Sub(double[] values)
         {
+            lastError = null;
+
             return (values?.Length > 1) 
                 ? values.Aggregate((temp, x) => temp - x) 
                 : double.NaN;
@@ -54,7 +58,6 @@ namespace Assignment1
 
         public static double Div(double left, double right)
         {
-            // reset
             lastError = null;
 
             if (right == 0d) {

@@ -10,11 +10,12 @@ namespace Assignment1.Tests
         {
             // Arrange
             var equation = "55.80+10.1*80/4-10+2.5";
-            var expected = 55.80 + 10.1 * 80 / 4 - 10 + 2.5; // 250,3
+            var expected =  55.80+10.1*80/4-10+2.5; // 250,3
             // Act
             var result = Calculator.RunEquation(equation);
             // Assert
             Assert.Equal(expected.ToString(), result.ToString());
+            Assert.Null(Calculator.GetLastError());
         }
 
         [Fact]
@@ -26,6 +27,7 @@ namespace Assignment1.Tests
             var result = Calculator.RunEquation(equation);
             // Assert
             Assert.True(double.IsNaN(result));
+            Assert.Contains("Invalid input", Calculator.GetLastError());
         }
 
         [Fact]
@@ -36,6 +38,7 @@ namespace Assignment1.Tests
             var result = Calculator.RunEquation(null);
             // Assert
             Assert.True(double.IsNaN(result));
+            Assert.Contains("Invalid input", Calculator.GetLastError());
         }
 
         [Fact]
@@ -68,11 +71,12 @@ namespace Assignment1.Tests
         {
             // Arrange
             var equation = new double[] { 10, 10, 10, 10, 10 };
-            var expected = 10 + 10 + 10 + 10 + 10; // 50
+            var expected = 10+10+10+10+10; // 50
             // Act
             var result = SimpleMath.Add(equation);
             // Assert
             Assert.Equal(expected, result);
+            Assert.Null(SimpleMath.GetLastError());
         }
 
         [Fact]
@@ -80,11 +84,12 @@ namespace Assignment1.Tests
         {
             // Arrange
             var equation = new double[] { 10, 10, 10, 10, 10 };
-            var expected = 10 - 10 - 10 - 10 - 10; // -30
+            var expected = 10-10-10-10-10; // -30
             // Act
             var result = SimpleMath.Sub(equation);
             // Assert
             Assert.Equal(expected, result);
+            Assert.Null(SimpleMath.GetLastError());
         }
     }
 }
