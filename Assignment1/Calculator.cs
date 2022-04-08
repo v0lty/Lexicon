@@ -25,7 +25,6 @@ namespace Assignment1
             // 55+10*80/4-10+2 is therefor equal to 55+(((10*80)/4)-10)+2 == 247
             for (int i = 0, j; i < operators.Length; i++)
             {
-                // loop equation for every instance current operator 
                 while ((j = inputList.IndexOf(operators[i].ToString())) >= 0)
                 {
                     // run equation of values left and right of found operator
