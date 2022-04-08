@@ -21,8 +21,8 @@ namespace Assignment1
 
             var inputList = SplitInput(TrimInput(input), operators);
 
-            // by scientific measures equations requires operators to be calculated in
-            // correct order (*/-+) 55+10*80/4-10+2 is therefor equal to 55+(((10*80)/4)-10)+2 == 247
+            // equation requires operators to be calculated in correct order (*/-+) 
+            // 55+10*80/4-10+2 is therefor equal to 55+(((10*80)/4)-10)+2 == 247
             for (int i = 0, j; i < operators.Length; i++)
             {
                 // loop equation for every instance current operator 
